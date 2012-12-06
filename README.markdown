@@ -44,6 +44,6 @@ mqtthttpd should not be run as root. Install authbind (apt-get install authbind)
     sudo touch /etc/authbind/byport/80
     sudo chmod 755 /etc/authbind/byport/80
     sudo chown username.username /etc/authbind/byport/80
-    ./mqtthttpd -v -r htdocs -l 80 -n foo -s test.mosquitto.org -p 1883
+    authbind ./mqtthttpd -v -r htdocs -l 80 -n foo -s test.mosquitto.org -p 1883
 
 
