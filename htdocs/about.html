@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MQTT-HTTP-Server</title>
+  </head>
+
+  <body>
+<h2>What is this?</h2>
+<p>
+<a href="http://mqtt.org">MQTT</a> is a lightweight publish subscribe protocol. This server provides an HTTP bridge to an MQTT broker. It uses long-polling to provide streaming data to browsers.
+
+<h2>Contact</h2>
+<p>
+<a href="mailto:toby@sensemote.com">toby@sensemote.com</a>. Find me on Twitter as <a href="http://twitter.com/tobyjaffey">@tobyjaffey</a> and on #mqtt as trj.
+
+<h2>Why?</h2>
+Bridging MQTT onto the web allows for browser based apps, mashups and experiments with real-time data.
+
+MQTT and HTTP are very different protocols. <a href="https://docs.google.com/document/d/1rODn8QzgbncB-EJg94Y-FWlsSgII0DxXOoBBZuc8Fvw/edit#">Read more about my take on the problem here</a>.
+
+For browsers which support WebSockets, <a href="http://test.mosquitto.org/ws.html">http://test.mosquitto.org/ws.html</a> provides similar functionality
+
+<h2>Example</h2>
+
+<h3>Publish and subscribe</h3>
+<div id="control">
+<form>
+<label>Topic</label><input type="textarea" value="$SYS/#" id="topic"/>
+<label>Message</label><input type="textarea" value="" id="message"/>
+<button class="btn" type="button" id="publish">Publish</button>
+<button class="btn" type="button" id="subscribe">Subscribe</button>
+</form>
+</div>
+<hr>
+<div id="log"></div>
+<hr>
+
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="api.js"></script>
+<script type="text/javascript">
+
+var logs = [];
+var topicPatt;
+var timer;
+
+function reconnect()
+{
+    clearTimeout(timer);
+    timer = setTimeout(function(){startStreaming();}, 1000);
+}
+
+function startStreaming()
+{
+    sensemote.register({
+        data: function(topic, msg) {
+            log("RX topic="+topic+" msg="+msg);
+        },
+        error: function() {reconnect();},
+    });
+    sensemote.subscribe(topicPatt, {success:sensemote.stream});
+}
+
+
+$(window).load(function()
+{
+    $('#publish').click(function() {
+        sensemote.publish($('#topic').val(), $('#message').val());
+    });
+
+    $('#subscribe').click(function() {
+        topicPatt = $('#topic').val();
+        startStreaming();
+    });
+});
+
+function log(str)
+{
+    logs.unshift(str);
+    if (logs.length > 10)
+       logs.splice(10, logs.length - 10);
+
+    var ul = $('<ul>').addClass('log');
+    for (line in logs)
+        ul.append( $('<li>').addClass('log').text(logs[line])  );
+    $('#log').html(ul);
+}
+
+</script>
+
+  </body>
+</html>

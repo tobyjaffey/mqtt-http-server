@@ -1,0 +1,51 @@
+TARGET=mqtthttpd
+
+CC = gcc
+OBJDIR=obj
+CFLAGS += -Wl,-Map=$(TARGET).map -Wall -g -O2 -I. -Ilibebb -DHAVE_GNUTLS -D_GNU_SOURCE
+#CFLAGS += -Werror
+LDFLAGS = -lev -lm -Llibebb -lebb -lpthread -lssl -lmosquitto -luriparser -lgnutls #-lefence
+
+vpath %.c common
+vpath %.h common
+
+OBJS=\
+    $(OBJDIR)/$(TARGET).o \
+    $(OBJDIR)/mqtt.o \
+    $(OBJDIR)/logging.o \
+    $(OBJDIR)/util.o \
+    $(OBJDIR)/jitter.o \
+    $(OBJDIR)/pidfile.o \
+    $(OBJDIR)/httpdconnlist.o \
+    $(OBJDIR)/b64.o \
+    $(OBJDIR)/tdate_parse.o \
+    $(OBJDIR)/httpd.o \
+    $(OBJDIR)/webapi.o \
+    $(OBJDIR)/midconnlist.o \
+    $(OBJDIR)/streamlist.o \
+    $(OBJDIR)/stream.o \
+    $(OBJDIR)/topic.o \
+    $(OBJDIR)/sublist.o \
+    $(OBJDIR)/cJSON.o \
+    $(OBJDIR)/webapi_serve.o \
+    $(OBJDIR)/path.o \
+    $(OBJDIR)/idset.o \
+    $(OBJDIR)/tailq.o \
+    $(OBJDIR)/random.o \
+    $(OBJDIR)/msgcache.o \
+    $(OBJDIR)/accesslog.o \
+    $(OBJDIR)/opt.o
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $(TARGET)
+
+$(OBJDIR)/%.o : %.c *.h common/*.h
+	@mkdir -p $(OBJDIR)
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+clean:
+	rm -rf $(OBJDIR) $(TARGET) package $(TARGET).map
+
+

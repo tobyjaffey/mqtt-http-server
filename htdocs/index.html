@@ -1,0 +1,120 @@
+<html>
+  <head>
+    <title>Checkbox example</title>
+    </style>
+  </head>
+
+  <body>
+
+<p>
+<h1>Well done, you've successfull installed mqtt-http-server</h1>
+For more information see <a href="about.html">about.html</a>.
+</p>
+
+<hr>
+
+<p>
+This page shows a simple example of subscribing and publishing to MQTT topics. Clicking the buttons publishes. The checkboxes are subscribed to topics.
+</p>
+
+<p>
+<b>sensemote/devices/button1</b>
+<p>
+<input type="checkbox" disabled id="checkbox1" value="checkbox1"/>
+<input type="button" id="button1on" value="sensemote/devices/button1=1"/>
+<input type="button" id="button1off" value="sensemote/devices/button1=0"/>
+</p>
+
+<b>sensemote/devices/button2</b>
+<p>
+<input type="checkbox" disabled id="checkbox2" value="checkbox2"/>
+<input type="button" id="button2on" value="sensemote/devices/button2=1"/>
+<input type="button" id="button2off" value="sensemote/devices/button2=0"/>
+</p>
+
+</p>
+
+<p>
+The checkboxes can be controlled from any MQTT client, eg.
+<pre>
+mosquitto_pub -h test.mosquitto.org -t "sensemote/devices/button1" -m "1"
+mosquitto_pub -h test.mosquitto.org -t "sensemote/devices/button1" -m "0"
+mosquitto_pub -h test.mosquitto.org -t "sensemote/devices/button2" -m "1"
+mosquitto_pub -h test.mosquitto.org -t "sensemote/devices/button2" -m "1"
+</pre>
+</p>
+
+<p>
+A client can also subscribe to the buttons, eg.
+<pre>
+mosquitto_sub -v -h test.mosquitto.org -t "sensemote/devices/button1"
+</pre>
+</p>
+
+<p>
+This page can be opened by multiple clients and used to share data via the MQTT broker.
+</p>
+
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="api.js"></script>
+<script type="text/javascript">
+
+var button1Topic = "sensemote/devices/button1"
+var button2Topic = "sensemote/devices/button2"
+var timer;
+var dispatchFunc;
+
+function reconnect()
+{
+    clearTimeout(timer);
+    timer = setTimeout(function(){startStreaming();}, 1000);
+}
+
+function startStreaming()
+{
+    sensemote.register({
+        data: function(topic, msg) {
+            dispatchFunc(topic, msg);
+        },
+        error: function() {reconnect();},
+    });
+    sensemote.subscribe(button1Topic, {success:sensemote.stream});
+    sensemote.subscribe(button2Topic, {success:sensemote.stream});
+}
+
+function mqttWidget(node)
+{
+    return function(_topic, _msg)
+    {
+        if (button1Topic == _topic)
+        {
+            if (_msg == '1')
+                $('#checkbox1').attr('checked', 'checked');
+            else
+                $('#checkbox1').removeAttr('checked');
+        }
+        if (button2Topic == _topic)
+        {
+            if (_msg == '1')
+                $('#checkbox2').attr('checked', 'checked');
+            else
+                $('#checkbox2').removeAttr('checked');
+        }
+    };
+}
+
+$(window).load(function()
+{
+    dispatchFunc = mqttWidget($('#widget'));
+
+    $("#button1on").click( function() { sensemote.publish(button1Topic, "1"); });
+    $("#button1off").click( function() { sensemote.publish(button1Topic, "0"); });
+    $("#button2on").click( function() { sensemote.publish(button2Topic, "1"); });
+    $("#button2off").click( function() { sensemote.publish(button2Topic, "0"); });
+
+    startStreaming();
+});
+
+</script>
+  </body>
+</html>
