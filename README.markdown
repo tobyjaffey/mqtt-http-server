@@ -12,7 +12,7 @@ Building
 
 Install dependencies
 
-    sudo apt-get install libgnutls-dev ragel liburiparser-dev libmosquitto0-dev libev-dev
+    sudo apt-get install make gcc libgnutls-dev ragel liburiparser-dev libmosquitto0-dev libev-dev libssl-dev
 
 Build it
 
