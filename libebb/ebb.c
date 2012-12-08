@@ -68,7 +68,7 @@ set_nonblock (int fd)
 static ssize_t 
 nosigpipe_push(void *data, const void *buf, size_t len)
 {
-  int fd = (int)data;
+  int fd = (int)(uintptr_t)data;
   int flags = 0;
 #ifdef MSG_NOSIGNAL
   flags = MSG_NOSIGNAL;
@@ -371,7 +371,7 @@ on_writable(struct ev_loop *loop, ev_io *watcher, int revents)
   } else {
 #endif /* HAVE_GNUTLS */
 
-    sent = nosigpipe_push( (void*)connection->fd
+    sent = nosigpipe_push( (void*)(intptr_t)connection->fd
                          , connection->to_write + connection->written
                          , connection->to_write_len - connection->written
                          );
@@ -514,7 +514,7 @@ on_connection(struct ev_loop *loop, ev_io *watcher, int revents)
     gnutls_set_default_priority(connection->session);
     gnutls_credentials_set(connection->session, GNUTLS_CRD_CERTIFICATE, connection->server->credentials);
 
-    gnutls_transport_set_ptr(connection->session, (gnutls_transport_ptr) fd); 
+    gnutls_transport_set_ptr(connection->session, (gnutls_transport_ptr)(intptr_t)fd); 
     gnutls_transport_set_push_function(connection->session, nosigpipe_push);
 
     gnutls_db_set_ptr (connection->session, &server->session_cache);
