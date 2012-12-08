@@ -104,7 +104,7 @@ static char *json_escape(const char *in)
 
 static void stream_drainer(stream_t *stream, const char *str, bool first, void *userdata)
 {
-    uint32_t connid = (uint32_t)userdata;
+    uint32_t connid = (uint32_t)(uintptr_t)userdata;
     LOG_DEBUG("drainer: %s first=%d", str, first);
     httpd_printf(connid, "%s%s", first ? "" : ",", str);
 }
@@ -257,7 +257,7 @@ bool message_to_stream(uint32_t streamid, stream_t *stream, void *userdata)
                 {
                     if (!conninfo->rawmode)
                         httpd_printf(connid, "[");
-                    stream_drain(stream, stream_drainer, (void *)connid);
+                    stream_drain(stream, stream_drainer, (void *)(uintptr_t)connid);
                     if (!conninfo->rawmode)
                         httpd_printf(connid, "]");
                     stream_clear_connection(stream);
@@ -584,7 +584,7 @@ static int webapi_stream(uint32_t connid, uint32_t method, int argc, char **argv
                 if (close_conn)
                     httpd_printf(connid, "\r\n");   // FIXME, should this be a single JSON doc?
                 httpd_printf(connid, "[");
-                stream_drain(streams[i], stream_drainer, (void *)connid);
+                stream_drain(streams[i], stream_drainer, (void *)(uintptr_t)connid);
                 httpd_printf(connid, "]");
                 close_conn = true;  // defer close till all available streams have been drained
             }

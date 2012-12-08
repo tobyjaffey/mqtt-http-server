@@ -3,7 +3,7 @@ TARGET=mqtthttpd
 CC = gcc
 OBJDIR=obj
 CFLAGS += -Wl,-Map=$(TARGET).map -Wall -g -O2 -I. -Ilibebb -DHAVE_GNUTLS -D_GNU_SOURCE
-#CFLAGS += -Werror
+CFLAGS += -Werror
 LDFLAGS = -lev -lm -Llibebb -lebb -lpthread -lssl -lmosquitto -luriparser -lgnutls #-lefence
 
 vpath %.c common
